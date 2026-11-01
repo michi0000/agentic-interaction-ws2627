@@ -81,7 +81,7 @@ API endpoint:
 Logs are written to:
 
 ```text
-logs/run.log
+logs/"RUN-ID".log
 ```
 
 Logged events:
