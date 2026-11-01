@@ -2,6 +2,7 @@ import os
 import sys
 
 from dotenv import load_dotenv
+from openai import OpenAI
 
 # ------------------------------------------------------------------
 # Load configuration from environment
@@ -22,6 +23,15 @@ if not MODEL:
     raise ValueError("MODEL not set")
 if not DATA_BASE_URL:
     raise ValueError("DATA_BASE_URL not set")
+
+# ------------------------------------------------------------------
+# OpenAI Client
+# ------------------------------------------------------------------
+client = OpenAI(
+    api_key=OPENAI_API_KEY,
+    base_url=OPENAI_BASE_URL,
+)
+
 
 # read user task from command line
 user_task = sys.argv[1]
