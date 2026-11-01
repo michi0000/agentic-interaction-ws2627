@@ -1,6 +1,7 @@
 import os
 import sys
 import requests
+import json
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -75,9 +76,53 @@ TOOLS = [
     }
 ]
 
-print(
-    get_calendar("2026-11-02")
-)
+
 
 # read user task from command line
 user_task = sys.argv[1]
+
+# messages for the first model call
+messages = [
+    {
+        "role": "user",
+        "content": user_task
+    }
+]
+
+# first model call
+response = client.chat.completions.create(
+    model=MODEL,
+    messages=messages,
+    tools=TOOLS
+)
+
+# extract tool call from model response
+message = response.choices[0].message
+# if not message.tool_calls:
+#     print(message.content)
+#     sys.exit(0)
+tool_call = message.tool_calls[0]
+
+args = json.loads(tool_call.function.arguments)
+result = get_calendar(args["date"])
+
+# Tool Ergebnis zurück ans Modell
+
+# Add the tool call to the messages list
+messages.append(message) 
+# Add the tool result to the messages list
+messages.append({
+    "role": "tool",
+    "tool_call_id": tool_call.id,
+    "content": json.dumps(result)
+})
+
+# Second model call with tool result 
+final_response = client.chat.completions.create(
+    model=MODEL,
+    messages=messages
+)
+
+# Extract the final answer from the model response
+answer = final_response.choices[0].message.content
+print(answer)
