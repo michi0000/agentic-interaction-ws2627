@@ -1,4 +1,5 @@
 import os
+import sys
 
 from dotenv import load_dotenv
 
@@ -22,4 +23,6 @@ if not MODEL:
 if not DATA_BASE_URL:
     raise ValueError("DATA_BASE_URL not set")
 
-print(MODEL)
+# read user task from command line
+user_task = sys.argv[1]
+print(user_task)
