@@ -42,7 +42,7 @@ client = OpenAI(
 # ------------------------------------------------------------------
 RUN_ID = str(uuid.uuid4())
 os.makedirs("logs", exist_ok=True)
-LOG_FILE = os.path.join("logs", "run.log")
+LOG_FILE = os.path.join("logs", f"{RUN_ID}.log")
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
