@@ -29,6 +29,8 @@ if not MODEL:
 if not DATA_BASE_URL:
     raise ValueError("DATA_BASE_URL not set")
 
+TODAY = datetime.now().strftime("%Y-%m-%d")
+
 # ------------------------------------------------------------------
 # OpenAI Client
 # ------------------------------------------------------------------
@@ -65,7 +67,7 @@ def log_event(
         "duration_ms": duration_ms,
     }
     with open(LOG_FILE, "a", encoding="utf-8") as f:
-        f.write(json.dumps(entry) + "\n")
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 # ------------------------------------------------------------------
 # Tool
@@ -152,7 +154,7 @@ TOOLS = [
 # ------------------------------------------------------------------
 def main():
     # check command line arguments
-    if len(sys.argv) < 2:
+    if len(sys.argv) != 2:
         print("Usage: python -m agent \"your question\"")
         sys.exit(1)
 
@@ -169,21 +171,27 @@ def main():
         {
             "role": "system",
             "content": ("""
-                You answer questions about a calendar. 
-                If a user asks about a specific day, 
-                use the available tool.
-                You ONLY know information that is obtained through tool calls.
-                You may:
-                - summarize tool results
-                - compare tool results with the user's question
-                - explain why a requested event cannot be found
-                You may not:
-                - invent appointments
-                - invent dates
-                - invent participants
-                - invent locations
-                Never use general knowledge.
-                Never make assumptions.
+                You are an assistant with access to calendar data.
+
+                Current date: {TODAY}
+
+                Rules:
+                - Calendar information may ONLY come from tool results.
+                - Never invent appointments.
+                - Never invent dates.
+                - Never invent participants.
+                - Never invent locations.
+                - If calendar information is requested, determine the exact date first.
+                - Use the current date above to resolve relative dates such as:
+                - today
+                - tomorrow
+                - yesterday
+                - next week
+                - next Monday
+                - this Friday
+                - Once a concrete date is known, use the calendar tool.
+                - General knowledge questions may be answered normally.
+                - If calendar data is unavailable, say so.
                 """
             ),
         },
